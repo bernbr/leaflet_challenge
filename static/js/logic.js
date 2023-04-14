@@ -18,10 +18,49 @@ function createFeatures(earthquakeData) {
 
   // Create a GeoJSON layer that contains the features array on the earthquakeData object.
   // Run the onEachFeature function once for each piece of data in the array.
+  //** For some reason I can't get the color and size to work.  */
   let earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature,
-    marker: eMarkers
+    onEachFeature: onEachFeature
   });
+
+  function eMarkers(){
+    // Loop through the cities array, and create one marker for each city object.
+    for (let i = 0; i < earthquakeData.length; i++) {
+  
+      // Conditionals for country gdp_pc
+      let color = "";
+      if (earthquakeData[i].features.geometry.coordinates[3] < 10) {
+        color = "lime";
+      }
+      else if (earthquakeData[i].features.geometry.coordinates[3] < 30) {
+        color = "yellow";
+      }
+      else if (earthquakeData[i].features.geometry.coordinates[3] < 50) {
+        color = "gold";
+      }
+      else if (earthquakeData[i].features.geometry.coordinates[3] < 70) {
+        color = "coral";
+      }
+      else if (earthquakeData[i].features.geometry.coordinates[3] <90) {
+        color = "darkorange";
+      }
+      else {
+        color = "red";
+      }
+  
+      var lat = earthquakeData[i].features.geometry.coordinates[1];
+      var lng = earthquakeData[i].features.geometry.coordinates[1];
+  
+      // Add circles to the map.
+      L.circle([lat, lng], {
+        fillOpacity: 0.75,
+        color: "white",
+        fillColor: color,
+        // Adjust the radius.
+        radius: Math.sqrt(earthquakeData[i].features.geometry.coordinates) * 50000
+      }).bindPopup(`<h3>${feature.properties.place}</h3><hr><p>${new Date(feature.properties.time)}</p>`).addTo(myMap);
+    };
+  }
 
   // Send our earthquakes layer to the createMap function/
   createMap(earthquakes);
@@ -55,7 +94,8 @@ function createMap(earthquakes) {
       39.27, -109.18
     ],
     zoom: 5,
-    layers: [street, earthquakes]
+    layers: [street, earthquakes],
+    eMarkers: eMarkers
   });
 
   // Create a layer control.
